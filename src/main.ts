@@ -1,32 +1,45 @@
-/**
- * Some predefined delay values (in milliseconds).
- */
-export enum Delays {
-  Short = 500,
-  Medium = 2000,
-  Long = 5000,
+import * as dotenv from 'dotenv'
+import { connect, Connection } from 'amqplib/callback_api'
+
+dotenv.config()
+const TASKS_QUEUE = process.env.TASKS_QUEUE
+const AMQP_URL = process.env.AMQP_URL
+
+function publisher(connection: Connection) {
+  connection.createChannel((err, channel) => {
+    if (err != null) {
+      console.error(err)
+      process.exit(1)
+    }
+
+    channel.assertQueue(TASKS_QUEUE)
+    channel.sendToQueue(TASKS_QUEUE, Buffer.from('Hello message'))
+  })
 }
 
-/**
- * Returns a Promise<string> that resolves after a given time.
- *
- * @param {string} name - A name.
- * @param {number=} [delay=Delays.Medium] - A number of milliseconds to delay resolution of the Promise.
- * @returns {Promise<string>}
- */
-function delayedHello(
-  name: string,
-  delay: number = Delays.Medium,
-): Promise<string> {
-  return new Promise((resolve: (value?: string) => void) =>
-    setTimeout(() => resolve(`Hello, ${name}`), delay),
-  );
+function initializeAMQP() {
+  connect(AMQP_URL, (err, connection) => {
+    if (err != null) {
+      console.error('initialize AMQP', err.message)
+      return setTimeout(initializeAMQP, 1000)
+    }
+
+    connection.on('error', (err) => {
+      if (err.message !== 'Connection closing') {
+        console.error('initialize AMQP', err.message)
+      }
+    })
+
+    connection.on('close', () => {
+      console.error('re-connection AMQP')
+      return setTimeout(initializeAMQP, 1000)
+    })
+
+    console.info('AMQP connected successfully')
+
+    publisher(connection)
+    return connection
+  })
 }
 
-// Below are examples of using ESLint errors suppression
-// Here it is suppressing a missing return type definition for the greeter function.
-
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function greeter(name: string) {
-  return await delayedHello(name, Delays.Long);
-}
+initializeAMQP()
