@@ -3,6 +3,8 @@
     "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
+    "rootDir": ".",
+    "outDir": "build",
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
     "importHelpers": true,
@@ -16,10 +18,14 @@
     "noUnusedParameters": true,
     "noImplicitAny": false,
     "noImplicitThis": false,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "esModuleInterop": true,
+    "isolatedModules": true
   },
   "include": [
     "src/**/*",
     "__tests__/**/*"
-  ]
+  ],
+  "exclude": ["node_modules"]
 }
+
