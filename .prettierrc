@@ -1,6 +1,11 @@
 {
+  "semi": false,
+  "trailingComma": "es5",
   "singleQuote": true,
-  "trailingComma": "all",
+  "printWidth": 120,
+  "tabWidth": 2,
+  "endOfLine": "auto",
+  "bracketSpacing": true,
   "overrides": [
     {
       "files": "*.ts",
